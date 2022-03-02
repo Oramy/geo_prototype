@@ -48,7 +48,7 @@ class PieceTool : EditorTool
 
 	void OnSelectionChanged()
 	{
-		if (EditorTools.IsActiveTool(this))
+		if (ToolManager.IsActiveTool(this))
 		{
 			TransformSelectionToRoot();
 		}
