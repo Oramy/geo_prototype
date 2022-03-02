@@ -67,6 +67,7 @@ class PieceTool : EditorTool
 		{
 			Piece piece = Selection.transforms[0].GetComponent<Piece>();
 			piece.transformToRoot();
+			angleSnap = piece.getRotationSymmetryAngle();
 		}
 
 		using (new Handles.DrawingScope(Color.green))
