@@ -21,5 +21,13 @@ public class PieceEditor : Editor
 		{
 			piece.transformToRoot();
 		}
+		if (GUILayout.Button("UnRoot"))
+		{
+			piece.unRoot();
+		}
+		if (GUILayout.Button("Create New ID"))
+		{
+			piece.updateToNewID();
+		}
 	}
 }
