@@ -36,6 +36,7 @@ public class Piece : MonoBehaviour
 	public void OnEnable()
 	{
 		oldRotation = Quaternion.identity;
+		UpdateAttachPoints();
 	}
 
 	public float GetRotationSymmetryAngle()
@@ -82,23 +83,17 @@ public class Piece : MonoBehaviour
 		}
 	}
 
-	public void UpdateParenting() {
-		this.UnRoot();
-
+	public void ApplyActionOnConnectedPieces(Action<Piece> action)
+    {
 		Queue<Piece> pieces = new Queue<Piece>();
 		List<Piece> seen = new List<Piece>();
 
-		foreach (var ap in attachPoints)
-		{
-			if(ap.piece != null)
-				pieces.Enqueue(ap.piece);
-		}
+		pieces.Enqueue(this);
 
 		while (pieces.Count > 0)
 		{
 			Piece piece = pieces.Dequeue();
-			piece.transform.SetParent(transform, true);
-			piece.id = this.id;
+			action.Invoke(piece);
 
 			foreach (var ap in piece.attachPoints)
 			{
@@ -108,7 +103,19 @@ public class Piece : MonoBehaviour
 				}
 			}
 		}
-		
+	
+    }
+
+	public void UpdateParenting() {
+		this.UnRoot();
+
+		Action<Piece> changeParentAndId = piece =>
+		{
+			piece.transform.SetParent(transform, true);
+			piece.id = this.id;
+		};
+
+		ApplyActionOnConnectedPieces(changeParentAndId);
 	}
 
 	public void UnAttach(Piece piece) {
@@ -181,14 +188,23 @@ public class Piece : MonoBehaviour
 			UpdateToNewID();
 	}
 
-	public void OnTransformChanged()
+    public void OnTransformChanged()
+    {
+		ApplyActionOnConnectedPieces(piece => piece.UpdateAttachPoints());
+    }
+
+    public void UpdateAttachPoints()
 	{
+		if (!this.canAttach)
+			return;
+
 		Collider2D[] colliders = new Collider2D[MAX_COLLIDER_TEST];
-		foreach (AttachedPoint ap in attachPoints)
+		foreach (AttachedPoint myAttachPoint in attachPoints)
 		{
-			if (!ap.enabled && ap.point != null)
+			if (!myAttachPoint.enabled && myAttachPoint.piece != null)
 				continue;
-			Transform point = ap.point;
+
+			Transform point = myAttachPoint.point;
 			Vector2 pos2 = new Vector2(point.position.x, point.position.y);
 			int resultCount = Physics2D.OverlapCircle(pos2, attachDistance, NO_FILTER, colliders);
 			for (int i = 0; i < resultCount; i++)
@@ -198,23 +214,26 @@ public class Piece : MonoBehaviour
 				if(rb2D != null)
 				{
 					Piece piece = rb2D.GetComponent<Piece>();
-					AttachedPoint otherAttachPoint = piece.GetAttachPoint(col.transform);
-					float dot = Vector3.Dot(ap.point.up, otherAttachPoint.point.up);
-					if (piece != null && piece != this
-						&& this.canAttach && piece.canAttach
-						&& otherAttachPoint.enabled && otherAttachPoint.piece == null
-						&& dot < -0.95f)
-					{
-						Piece rootPiece = GetRootPiece(piece);
+					if (piece == null || piece == this || !piece.canAttach)
+						continue;
 
-						if (rootPiece.id != this.id)
-						{
-							ap.piece = piece;
-							otherAttachPoint.piece = this;
-							Vector3 delta = point.position - col.bounds.center;
-							rootPiece.transform.Translate(delta, Space.World);
-							SetAsChild(rootPiece);
-						}
+					AttachedPoint otherAttachPoint = piece.GetAttachPoint(col.transform);
+					if (!otherAttachPoint.enabled || otherAttachPoint.piece != null)
+						continue;
+
+					float dot = Vector3.Dot(myAttachPoint.point.up, otherAttachPoint.point.up);
+					if (dot > -0.95f)
+						continue;
+
+					myAttachPoint.piece = piece;
+					otherAttachPoint.piece = this;
+
+					Piece rootPiece = GetRootPiece(piece);
+					if (rootPiece.id != this.id)
+					{
+						Vector3 delta = point.position - otherAttachPoint.point.position;
+						rootPiece.transform.Translate(delta, Space.World);
+						SetAsChild(rootPiece);
 					}
 				}
 			}
