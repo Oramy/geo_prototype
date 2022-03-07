@@ -40,7 +40,7 @@ class PieceTool : EditorTool
 		foreach (var transform in Selection.transforms)
 		{
 			Piece piece = transform.GetComponent<Piece>();
-			piece.transformToRoot();
+			piece.TransformToRoot();
 		}
 	}
 
@@ -75,7 +75,7 @@ class PieceTool : EditorTool
 
 				if (!ap.enabled && ap.piece != null)
 				{
-					piece.unAttach(ap);
+					piece.UnAttach(ap);
 				}
 			}
 		}

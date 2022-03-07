@@ -38,13 +38,13 @@ public class Piece : MonoBehaviour
 		oldRotation = Quaternion.identity;
 	}
 
-	public float getRotationSymmetryAngle()
+	public float GetRotationSymmetryAngle()
 	{
 
 		return 360f / vertices;
 	}
 
-	public static Piece getRootPiece(Piece p)
+	public static Piece GetRootPiece(Piece p)
 	{
 		Transform root = p.transform;
 		while (root.parent != null && root.parent.GetComponent<Piece>() != null)
@@ -57,18 +57,18 @@ public class Piece : MonoBehaviour
 		return piece;
 	}
 
-	public void transformToRoot() {
-		Piece rootPiece = getRootPiece(this);
+	public void TransformToRoot() {
+		Piece rootPiece = GetRootPiece(this);
 		transform.SetParent(rootPiece.transform.parent, true);
-		setAsChild(rootPiece);
+		SetAsChild(rootPiece);
 	}
 
-	public void updateToNewID()
+	public void UpdateToNewID()
 	{
-		id = PieceManager.instance.getNewID();
+		id = PieceManager.instance.GetNewID();
 	}
 
-	public void unRoot() {
+	public void UnRoot() {
 		Transform oldParent = transform.parent;
 		if (oldParent == null)
 			return;
@@ -78,12 +78,12 @@ public class Piece : MonoBehaviour
 		if (oldParent != null)
 		{
 			transform.parent = oldParent.parent;
-			updateToNewID();
+			UpdateToNewID();
 		}
 	}
 
-	public void updateParenting() {
-		this.unRoot();
+	public void UpdateParenting() {
+		this.UnRoot();
 
 		Queue<Piece> pieces = new Queue<Piece>();
 		List<Piece> seen = new List<Piece>();
@@ -111,7 +111,7 @@ public class Piece : MonoBehaviour
 		
 	}
 
-	public void unAttach(Piece piece) {
+	public void UnAttach(Piece piece) {
 		foreach (var ap in attachPoints)
 		{
 			if (ap.piece == piece)
@@ -121,7 +121,7 @@ public class Piece : MonoBehaviour
 		}
 	}
 
-	public void unAttach(AttachedPoint ap) {
+	public void UnAttach(AttachedPoint ap) {
 		if (ap == null)
 			return;
 		if (ap.piece == null)
@@ -131,16 +131,16 @@ public class Piece : MonoBehaviour
 			return;
 		}
 
-		ap.piece.unAttach(this);
+		ap.piece.UnAttach(this);
 
-		this.unRoot();
-		ap.piece.unRoot();
-		this.updateParenting();
-		ap.piece.updateParenting();
+		this.UnRoot();
+		ap.piece.UnRoot();
+		this.UpdateParenting();
+		ap.piece.UpdateParenting();
 		ap.piece = null;
 	}
 
-	public void setAsChild(Piece piece)
+	public void SetAsChild(Piece piece)
 	{
 		Transform tr = piece.transform;
 		tr.SetParent(transform, true);
@@ -152,10 +152,10 @@ public class Piece : MonoBehaviour
 		}
 
 		this.id = piece.id;
-		setChildIDs();
+		SetChildIDs();
 	}
 
-	private void setChildIDs()
+	private void SetChildIDs()
 	{
 		foreach (Transform child in transform)
 		{
@@ -165,7 +165,7 @@ public class Piece : MonoBehaviour
 		}
 	}
 
-	public AttachedPoint getAttachPoint(Transform tr)
+	public AttachedPoint GetAttachPoint(Transform tr)
 	{
 		foreach (AttachedPoint ap in attachPoints)
 		{
@@ -178,7 +178,7 @@ public class Piece : MonoBehaviour
 	public void Update()
 	{
 		if (id == 0 && !PrefabUtility.IsPartOfPrefabAsset(this))
-			updateToNewID();
+			UpdateToNewID();
 	}
 
 	public void OnTransformChanged()
@@ -198,14 +198,14 @@ public class Piece : MonoBehaviour
 				if(rb2D != null)
 				{
 					Piece piece = rb2D.GetComponent<Piece>();
-					AttachedPoint otherAttachPoint = piece.getAttachPoint(col.transform);
+					AttachedPoint otherAttachPoint = piece.GetAttachPoint(col.transform);
 					float dot = Vector3.Dot(ap.point.up, otherAttachPoint.point.up);
 					if (piece != null && piece != this
 						&& this.canAttach && piece.canAttach
 						&& otherAttachPoint.enabled && otherAttachPoint.piece == null
 						&& dot < -0.95f)
 					{
-						Piece rootPiece = getRootPiece(piece);
+						Piece rootPiece = GetRootPiece(piece);
 
 						if (rootPiece.id != this.id)
 						{
@@ -213,17 +213,13 @@ public class Piece : MonoBehaviour
 							otherAttachPoint.piece = this;
 							Vector3 delta = point.position - col.bounds.center;
 							rootPiece.transform.Translate(delta, Space.World);
-							setAsChild(rootPiece);
+							SetAsChild(rootPiece);
 						}
 					}
 				}
 			}
 			
 		}
-	}
-
-	public void checkAttachmentWithPiece() {
-
 	}
 
 	public void OnDrawGizmos() {
@@ -243,7 +239,7 @@ public class Piece : MonoBehaviour
 		Vector3 position = Tools.handlePosition;
 		Quaternion rotation = oldRotation;
 
-		float angleSnap = getRotationSymmetryAngle();
+		float angleSnap = GetRotationSymmetryAngle();
 
 		using (new Handles.DrawingScope(Color.red))
 		{
@@ -252,7 +248,7 @@ public class Piece : MonoBehaviour
 
 		if (EditorGUI.EndChangeCheck())
 		{
-			this.transformToRoot();
+			this.TransformToRoot();
 			Quaternion deltaRotation = rotation * Quaternion.Inverse(oldRotation);
 			Undo.RecordObjects(Selection.transforms, "Rotate Piece");
 

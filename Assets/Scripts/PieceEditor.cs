@@ -19,15 +19,15 @@ public class PieceEditor : Editor
 
 		if (GUILayout.Button("SetToRoot"))
 		{
-			piece.transformToRoot();
+			piece.TransformToRoot();
 		}
 		if (GUILayout.Button("UnRoot"))
 		{
-			piece.unRoot();
+			piece.UnRoot();
 		}
 		if (GUILayout.Button("Create New ID"))
 		{
-			piece.updateToNewID();
+			piece.UpdateToNewID();
 		}
 	}
 }

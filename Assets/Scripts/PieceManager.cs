@@ -9,7 +9,7 @@ public class PieceManager : ScriptableSingleton<PieceManager>
 	[SerializeField]
 	private long id_counter = 0;
 
-	public long getNewID()
+	public long GetNewID()
 	{
 		return id_counter++;
 	} 
