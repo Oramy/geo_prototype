@@ -63,17 +63,20 @@ class PieceTool : EditorTool
 
 			foreach (Piece.AttachedPoint ap in piece.attachPoints)
 			{
-			
 				Transform attachPoint = ap.point;
 				Vector3 screenPos = sceneCam.WorldToScreenPoint(attachPoint.position);
-				Rect r = new Rect(screenPos.x - 10, sceneCam.pixelHeight - screenPos.y - 10, 20, 20);
+				screenPos.y = sceneCam.pixelHeight - screenPos.y;
+				screenPos /= Utils.GetPixelsPerPoint();
+				Rect r = new Rect(screenPos.x - 10, screenPos.y - 10, 20, 20);
+
 				GUILayout.BeginArea(r);
 				ap.enabled = GUILayout.Toggle(ap.enabled, "");
+				GUILayout.EndArea();
+
 				if (!ap.enabled && ap.piece != null)
 				{
 					piece.unAttach(ap);
 				}
-				GUILayout.EndArea();
 			}
 		}
 
