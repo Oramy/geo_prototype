@@ -1,11 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
-[FilePath("Preferences/PieceManager.cfg", FilePathAttribute.Location.PreferencesFolder)]
-public class PieceManager : ScriptableSingleton<PieceManager>
+public class PieceManager
 {
+	private static PieceManager _instance;
+
+	public static PieceManager instance
+	{
+		get
+		{
+			if (_instance == null)
+				_instance = new PieceManager();
+			return _instance;
+		}
+	}
+		
+
 	[SerializeField]
 	private long id_counter = 0;
 

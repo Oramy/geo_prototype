@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+
 
 [CustomEditor(typeof(Piece))]
 [CanEditMultipleObjects]
@@ -31,3 +33,4 @@ public class PieceEditor : Editor
 		}
 	}
 }
+#endif

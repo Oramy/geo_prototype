@@ -184,8 +184,10 @@ public class Piece : MonoBehaviour
 
 	public void Update()
 	{
+#if UNITY_EDITOR
 		if (id == 0 && !PrefabUtility.IsPartOfPrefabAsset(this))
 			UpdateToNewID();
+#endif
 	}
 
     public void OnTransformChanged()
@@ -237,10 +239,10 @@ public class Piece : MonoBehaviour
 					}
 				}
 			}
-			
 		}
 	}
 
+#if UNITY_EDITOR
 	public void OnDrawGizmos() {
 		RotationHandle();
 		foreach (AttachedPoint ap in attachPoints)
@@ -282,4 +284,5 @@ public class Piece : MonoBehaviour
 			oldRotation = rotation;
 		}
 	}
+#endif
 }
