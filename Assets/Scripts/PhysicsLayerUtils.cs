@@ -17,11 +17,16 @@ public class PhysicsLayerUtils : MonoBehaviour
     private int _PIECE_LAYER;
     public int PIECE_LAYER { get { return _PIECE_LAYER; } }
 
-    private ContactFilter2D _ATTACH_POINT_FILTER;
-	public ContactFilter2D ATTACH_POINT_FILTER
+    private static ContactFilter2D _ATTACH_POINT_FILTER;
+	public static ContactFilter2D ATTACH_POINT_FILTER
     {
         get
         {
+            if (_ATTACH_POINT_FILTER.layerMask.value != 0)
+            {
+                return _ATTACH_POINT_FILTER;
+            }
+            _ATTACH_POINT_FILTER.SetLayerMask(1 << LayerMask.NameToLayer("AttachPoint"));
             return _ATTACH_POINT_FILTER;
         }
     }
@@ -36,8 +41,6 @@ public class PhysicsLayerUtils : MonoBehaviour
         else
             _instance = this;
 
-        _ATTACH_POINT_FILTER = new ContactFilter2D();
-        _ATTACH_POINT_FILTER.SetLayerMask(LayerMask.NameToLayer("AttachPoint"));
         _PIECE_LAYER = LayerMask.NameToLayer("Piece");
     }
 }
