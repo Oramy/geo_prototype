@@ -9,7 +9,9 @@ public class Piece : MonoBehaviour
 {
 	private static int MAX_COLLIDER_TEST = 5;
 	private static float attachDistance = 0.05f;
-	private static ContactFilter2D NO_FILTER = new ContactFilter2D().NoFilter();
+
+	static Piece() {
+	}
 
 	[SerializeField]
 	private int vertices;
@@ -33,7 +35,7 @@ public class Piece : MonoBehaviour
 
 	Quaternion oldRotation;
 
-	public void OnEnable()
+	public void Start()
 	{
 		oldRotation = Quaternion.identity;
 		UpdateAttachPoints();
@@ -208,7 +210,8 @@ public class Piece : MonoBehaviour
 
 			Transform point = myAttachPoint.point;
 			Vector2 pos2 = new Vector2(point.position.x, point.position.y);
-			int resultCount = Physics2D.OverlapCircle(pos2, attachDistance, NO_FILTER, colliders);
+			int resultCount = Physics2D.OverlapCircle(pos2, attachDistance,
+				PhysicsLayerUtils.Instance.ATTACH_POINT_FILTER, colliders);
 			for (int i = 0; i < resultCount; i++)
 			{
 				Collider2D col = colliders[i];

@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 5115088277823836414}
   - component: {fileID: 3671030110800252192}
   - component: {fileID: 3264361158341824088}
-  m_Layer: 0
+  - component: {fileID: 245433527805110095}
+  m_Layer: 7
   m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -113,7 +114,7 @@ MonoBehaviour:
   - point: {fileID: 2841649711789767554}
     enabled: 1
     piece: {fileID: 0}
-  id: 0
+  id: 81
   canAttach: 1
 --- !u!50 &3264361158341824088
 Rigidbody2D:
@@ -136,6 +137,32 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!61 &245433527805110095
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5115088277823836415}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 0.16, y: 0.16}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &8964946039786212934
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,6 +265,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4991335654136373902, guid: 1fb05b46ebe842e4d942d0dcab52c746,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1fb05b46ebe842e4d942d0dcab52c746, type: 3}
 --- !u!4 &4394996685803692079 stripped
@@ -312,6 +344,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4991335654136373902, guid: 1fb05b46ebe842e4d942d0dcab52c746,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1fb05b46ebe842e4d942d0dcab52c746, type: 3}
@@ -388,6 +425,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 4991335654136373902, guid: 1fb05b46ebe842e4d942d0dcab52c746,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1fb05b46ebe842e4d942d0dcab52c746, type: 3}
 --- !u!4 &8339128367255693859 stripped
@@ -462,6 +504,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4991335654136373902, guid: 1fb05b46ebe842e4d942d0dcab52c746,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1fb05b46ebe842e4d942d0dcab52c746, type: 3}

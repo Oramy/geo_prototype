@@ -6,6 +6,16 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class PuzzleController : MonoBehaviour
 {
+    private enum ControllerState
+    {
+        Idle,
+        Translation,
+        Zoom,
+        RotatePiece
+    }
+
+    private ControllerState controllerState;
+
     [SerializeField] private InputActions inputActions;
 
     private Vector2 startPinchPos1;
@@ -24,12 +34,20 @@ public class PuzzleController : MonoBehaviour
     private float minOrthoSize;
     private float maxOrthoSize;
 
-    [SerializeField] private float translateSensivity = 1f;
+    private Vector3 translateTargetPosition;
+    [SerializeField] private float translateOneSecondDecay = 0.1f;
+    [SerializeField] private float translateMinDistance = 0.01f;
 
+    private Piece selectedPiece;
+
+#if UNITY_EDITOR
+    private Vector3 debugFirstTouchWorldPosition;
+#endif
 
     private void Awake()
     {
         inputActions = new InputActions();
+        controllerState = ControllerState.Idle;
     }
 
     void Start()
@@ -47,8 +65,13 @@ public class PuzzleController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (controllerState == ControllerState.Translation)
+        {
+            UpdateTranslate();
+        }
         
     }
+
 
     private void OnEnable()
     {
@@ -65,7 +88,6 @@ public class PuzzleController : MonoBehaviour
         inputActions.Player.Grab.canceled -= GrabCanceled;
     }
 
-    private bool isGrabbing = false;
     private void OnGrab()
     {
 #if DEBUG_LOG
@@ -73,21 +95,70 @@ public class PuzzleController : MonoBehaviour
 #endif
     }
 
+    private void GrabStarted(InputAction.CallbackContext obj)
+    {
+        InitGrab();
+    }
+
     private void GrabCanceled(InputAction.CallbackContext obj)
     {
-        isGrabbing = false;
+        controllerState = ControllerState.Idle;
+    }
+
+#if UNITY_EDITOR
+    private void GrabPieceGizmos()
+    {
+        if(debugFirstTouchWorldPosition != null)
+            Gizmos.DrawSphere(debugFirstTouchWorldPosition, 0.1f);
+    }
+#endif 
+    private bool InitGrabPiece()
+    {
+        Vector2 touchWorldPosition = orthoCamera.ScreenToWorldPoint(startTouchPos);
+#if UNITY_EDITOR
+        debugFirstTouchWorldPosition = touchWorldPosition;
+#endif
+        Collider2D touchedCollider = Physics2D.OverlapPoint(touchWorldPosition,
+            PhysicsLayerUtils.Instance.PIECE_LAYER);
+        if (touchedCollider != null)
+        {
+            Transform touchedTransform = touchedCollider.transform;
+            Piece piece = null;
+            if (touchedTransform.TryGetComponent<Piece>(out piece))
+            {
+#if DEBUG_LOG
+                Debug.Log("Touched piece.");
+#endif
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     private void InitGrab()
     {
         startTouchPos = inputActions.Player.FirstTouchPosition.ReadValue<Vector2>();
         startCameraPos = orthoCamera.transform.position;
-        isGrabbing = true;
+
+        if (InitGrabPiece())
+            return;
+
+        controllerState = ControllerState.Translation;
     }
 
-    private void GrabStarted(InputAction.CallbackContext obj)
+#region CameraTranslation
+    private void UpdateTranslate()
     {
-        InitGrab();
+        if (translateTargetPosition == null || controllerState != ControllerState.Translation)
+            return;
+        if (Vector3.Distance(translateTargetPosition, orthoCamera.transform.position)
+            > translateMinDistance)
+        {
+            float t = 1f - Mathf.Pow(translateOneSecondDecay, Time.deltaTime);
+            Transform camTransform = orthoCamera.transform;
+            camTransform.position = Vector3.Lerp(camTransform.position, translateTargetPosition, t);
+        }
     }
 
     private void OnDrag()
@@ -95,24 +166,21 @@ public class PuzzleController : MonoBehaviour
 #if DEBUG_LOG
         Debug.Log("OnDrag");
 #endif
-        if (!inputActions.Player.SecondTouch.IsPressed() && isGrabbing)
+        if (!inputActions.Player.SecondTouch.IsPressed()
+            && controllerState == ControllerState.Translation)
         {
-            /*Vector2 delta = inputActions.Player.Drag.ReadValue<Vector2>();
-            Vector4 viewportDelta = new Vector4(delta.x / orthoCamera.pixelWidth * 2,
-                delta.y / orthoCamera.pixelHeight * 2, 0, 0);
-            Debug.Log(orthoCamera.projectionMatrix.inverse);
-            Vector3 worldDelta = orthoCamera.projectionMatrix.inverse * viewportDelta;
-            Debug.Log($"{viewportDelta}, {worldDelta}");*/
             Vector2 touchPos = inputActions.Player.FirstTouchPosition.ReadValue<Vector2>();
             Vector3 worldStartTouchPos = orthoCamera.ScreenToWorldPoint(startTouchPos);
             Vector3 worldTouchPos = orthoCamera.ScreenToWorldPoint(touchPos);
             Vector3 deltaPos = worldTouchPos - worldStartTouchPos;
-            orthoCamera.transform.position = startCameraPos - deltaPos;
+            translateTargetPosition = startCameraPos - deltaPos;
         }
         else {
             InitGrab();
         }
     }
+#endregion
+#region CameraZoom
 
     private void OnMouseScroll()
     {
@@ -141,11 +209,6 @@ public class PuzzleController : MonoBehaviour
         Debug.Log("OnSecondTouch");
 #endif
         StartPinch();
-    }
-
-    private void TranslateCamera(Vector3 delta)
-    {
-        orthoCamera.transform.Translate(delta);
     }
 
     private void ZoomOrthoCamera(Vector3 zoomTowards, float amount)
@@ -194,6 +257,8 @@ public class PuzzleController : MonoBehaviour
         ZoomOrthoCamera(zoomTowardsInWorld, zoom);
     }
 
+#endregion
+
 
     private void OnDoubleTap()
     { 
@@ -201,4 +266,11 @@ public class PuzzleController : MonoBehaviour
         Debug.Log("OnDoubleTap");
 #endif
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        GrabPieceGizmos();
+    }
+#endif
 }

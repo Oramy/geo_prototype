@@ -129,7 +129,8 @@ GameObject:
   - component: {fileID: 7552349310878529837}
   - component: {fileID: 7552349310878529842}
   - component: {fileID: 6675426159816989156}
-  m_Layer: 0
+  - component: {fileID: 1087186071965264688}
+  m_Layer: 7
   m_Name: Triangle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -176,7 +177,7 @@ MonoBehaviour:
   - point: {fileID: 8674993088856222871}
     enabled: 1
     piece: {fileID: 0}
-  id: 0
+  id: 82
   canAttach: 1
 --- !u!50 &6675426159816989156
 Rigidbody2D:
@@ -199,6 +200,34 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!60 &1087186071965264688
+PolygonCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7552349310878529839}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: -0.013629058, y: 2.1993573}
+      - {x: 1.8974164, y: -1.0811468}
+      - {x: -1.9047412, y: -1.0834153}
 --- !u!1001 &184811082450472348
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -265,6 +294,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: AttachPoint
+      objectReference: {fileID: 0}
+    - target: {fileID: 4991335654136373902, guid: 1fb05b46ebe842e4d942d0dcab52c746,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1fb05b46ebe842e4d942d0dcab52c746, type: 3}
@@ -341,6 +375,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: AttachPoint
       objectReference: {fileID: 0}
+    - target: {fileID: 4991335654136373902, guid: 1fb05b46ebe842e4d942d0dcab52c746,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1fb05b46ebe842e4d942d0dcab52c746, type: 3}
 --- !u!4 &8674993088856222871 stripped
@@ -415,6 +454,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: AttachPoint
+      objectReference: {fileID: 0}
+    - target: {fileID: 4991335654136373902, guid: 1fb05b46ebe842e4d942d0dcab52c746,
+        type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1fb05b46ebe842e4d942d0dcab52c746, type: 3}
