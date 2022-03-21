@@ -40,8 +40,11 @@ class PieceTool : EditorTool
 	{
 		foreach (var transform in Selection.transforms)
 		{
-			Piece piece = transform.GetComponent<Piece>();
-			piece.TransformToRoot();
+			Piece piece;
+			if (transform.TryGetComponent<Piece>(out piece))
+			{ 
+				piece.TransformToRoot();
+			}
 		}
 	}
 

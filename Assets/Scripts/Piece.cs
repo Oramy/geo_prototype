@@ -5,6 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 [ExecuteInEditMode]
+[SelectionBase]
 public class Piece : MonoBehaviour
 {
     private static int MAX_COLLIDER_TEST = 5;
