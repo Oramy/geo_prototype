@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class PhysicsLayerUtils : MonoBehaviour
 {
     private static PhysicsLayerUtils _instance;
@@ -27,12 +28,15 @@ public class PhysicsLayerUtils : MonoBehaviour
 
     public void Awake()
     {
+#if !UNITY_EDITOR
         DontDestroyOnLoad(this);
+#endif
         if (_instance != null)
             DestroyImmediate(this);
         else
             _instance = this;
 
+        _ATTACH_POINT_FILTER = new ContactFilter2D();
         _ATTACH_POINT_FILTER.SetLayerMask(LayerMask.NameToLayer("AttachPoint"));
         _PIECE_LAYER = LayerMask.NameToLayer("Piece");
     }

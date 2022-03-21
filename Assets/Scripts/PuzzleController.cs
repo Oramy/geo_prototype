@@ -11,6 +11,7 @@ public class PuzzleController : MonoBehaviour
         Idle,
         Translation,
         Zoom,
+        InitRotatePiece,
         RotatePiece
     }
 
@@ -39,9 +40,15 @@ public class PuzzleController : MonoBehaviour
     [SerializeField] private float translateMinDistance = 0.01f;
 
     private Piece selectedPiece;
+    private Vector3 startRotatePiecePosition;
+    private float rotatePieceDeltaAngle;
+    private float startRotatePieceRotation;
+    [SerializeField] private float rotationSnapAngle = 10;
+    [SerializeField] private float minRotatePieceDistance = 0.1f;
 
 #if UNITY_EDITOR
     private Vector3 debugFirstTouchWorldPosition;
+    private Vector3 debugRotatePieceWorldPosition;
 #endif
 
     private void Awake()
@@ -65,9 +72,17 @@ public class PuzzleController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (controllerState == ControllerState.Translation)
+        switch(controllerState)
         {
-            UpdateTranslate();
+            case ControllerState.Translation:
+                UpdateTranslate();
+                break;
+            case ControllerState.InitRotatePiece:
+                InitRotatePiece();
+                break;
+            case ControllerState.RotatePiece:
+                UpdateRotatePiece();
+                break;
         }
         
     }
@@ -102,6 +117,10 @@ public class PuzzleController : MonoBehaviour
 
     private void GrabCanceled(InputAction.CallbackContext obj)
     {
+        if (controllerState == ControllerState.RotatePiece)
+        {
+            EndRotatePiece();
+        }
         controllerState = ControllerState.Idle;
     }
 
@@ -119,9 +138,12 @@ public class PuzzleController : MonoBehaviour
         debugFirstTouchWorldPosition = touchWorldPosition;
 #endif
         Collider2D touchedCollider = Physics2D.OverlapPoint(touchWorldPosition,
-            PhysicsLayerUtils.Instance.PIECE_LAYER);
+            ~PhysicsLayerUtils.Instance.PIECE_LAYER);
         if (touchedCollider != null)
         {
+#if DEBUG_LOG
+                Debug.Log("Touched piece collider.");
+#endif
             Transform touchedTransform = touchedCollider.transform;
             Piece piece = null;
             if (touchedTransform.TryGetComponent<Piece>(out piece))
@@ -129,12 +151,80 @@ public class PuzzleController : MonoBehaviour
 #if DEBUG_LOG
                 Debug.Log("Touched piece.");
 #endif
+                selectedPiece = piece;
+                selectedPiece.TransformToRoot();
+                controllerState = ControllerState.InitRotatePiece;
                 return true;
             }
         }
         
         return false;
     }
+
+    private void InitRotatePiece()
+    {
+        Vector2 touchPos = inputActions.Player.FirstTouchPosition.ReadValue<Vector2>();
+        Vector3 touchPosWorld = orthoCamera.ScreenToWorldPoint(touchPos);
+        touchPosWorld.z = 0;
+        if (Vector2.Distance(touchPosWorld, selectedPiece.transform.position) > minRotatePieceDistance)
+        {
+            startRotatePieceRotation = selectedPiece.transform.rotation.eulerAngles.z;
+            startRotatePiecePosition = touchPosWorld;
+            controllerState = ControllerState.RotatePiece;
+        }
+    }
+
+    private void UpdateRotatePiece()
+    {
+        Vector2 touchPos = inputActions.Player.FirstTouchPosition.ReadValue<Vector2>();
+        Vector3 touchPosWorld = orthoCamera.ScreenToWorldPoint(touchPos);
+        touchPosWorld.z = 0;
+#if UNITY_EDITOR
+        debugRotatePieceWorldPosition = touchPosWorld;
+#endif
+
+        rotatePieceDeltaAngle = Vector3.SignedAngle((startRotatePiecePosition - selectedPiece.transform.position).normalized,
+            (touchPosWorld - selectedPiece.transform.position).normalized, Vector3.forward);
+
+        float rotation = startRotatePieceRotation + rotatePieceDeltaAngle;
+        int validRotIndex = Mathf.RoundToInt(rotatePieceDeltaAngle / selectedPiece.GetRotationSymmetryAngle());
+        float deltaValidRotation = validRotIndex * selectedPiece.GetRotationSymmetryAngle();
+        float angleToValidRotation = deltaValidRotation - rotatePieceDeltaAngle;
+
+        if (Mathf.Abs(angleToValidRotation) < rotationSnapAngle)
+        {
+            rotation += angleToValidRotation;
+            selectedPiece.OnTransformChanged();
+        }
+        
+        selectedPiece.transform.rotation = Quaternion.AngleAxis(rotation, Vector3.forward);
+    }
+
+    private void EndRotatePiece()
+    {
+        int validRotIndex = Mathf.RoundToInt(rotatePieceDeltaAngle / selectedPiece.GetRotationSymmetryAngle());
+        float validRotation = validRotIndex * selectedPiece.GetRotationSymmetryAngle();
+        selectedPiece.transform.rotation = Quaternion.AngleAxis(startRotatePieceRotation + validRotation, Vector3.forward);
+        selectedPiece.OnTransformChanged();
+    }
+
+#if UNITY_EDITOR
+    private void RotatePieceGizmos()
+    {
+        if (selectedPiece == null || (controllerState != ControllerState.InitRotatePiece && controllerState != ControllerState.RotatePiece))
+            return;
+        if (debugRotatePieceWorldPosition != null)
+        {
+            Gizmos.color = Color.red; 
+            Gizmos.DrawLine(selectedPiece.transform.position, debugRotatePieceWorldPosition);
+        }
+        if (startRotatePiecePosition != null)
+        {
+            Gizmos.color = Color.green; 
+            Gizmos.DrawLine(selectedPiece.transform.position, startRotatePiecePosition);
+        }
+    }
+#endif 
 
     private void InitGrab()
     {
@@ -163,9 +253,6 @@ public class PuzzleController : MonoBehaviour
 
     private void OnDrag()
     {
-#if DEBUG_LOG
-        Debug.Log("OnDrag");
-#endif
         if (!inputActions.Player.SecondTouch.IsPressed()
             && controllerState == ControllerState.Translation)
         {
@@ -175,7 +262,7 @@ public class PuzzleController : MonoBehaviour
             Vector3 deltaPos = worldTouchPos - worldStartTouchPos;
             translateTargetPosition = startCameraPos - deltaPos;
         }
-        else {
+        else if (controllerState == ControllerState.Idle){
             InitGrab();
         }
     }
@@ -271,6 +358,7 @@ public class PuzzleController : MonoBehaviour
     private void OnDrawGizmos()
     {
         GrabPieceGizmos();
+        RotatePieceGizmos();
     }
 #endif
 }
